@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacto — Karmylis Boutique</title>
+  </head>
+  <body data-page="contacto">
+    <div class="k-wrap">
+      <main class="k-page">
+        <div class="k-page-head">
+          <span class="k-eyebrow" style="justify-content:center">Estamos para atenderte</span>
+          <h1>Contacto &amp; <em>visítanos</em></h1>
+          <p>Boutique en La Paz o chat directo por WhatsApp.</p>
+        </div>
+        <div class="k-2col">
+          <div class="k-info-card rv">
+            <span class="k-eyebrow">Sucursal principal</span>
+            <h2 style="font-family:var(--font-display);font-size:30px;margin:8px 0 4px">Boutique Plaza Real</h2>
+            <div class="k-info-row"><i>◎</i><div><strong>Dirección</strong><p>Centro Comercial Plaza Real · Calle Comercio, La Paz</p></div></div>
+            <div class="k-info-row"><i>◷</i><div><strong>Horarios</strong><p>Lun a Sáb: 10:00 – 19:30 · Domingos con cita</p></div></div>
+            <div class="k-info-row"><i>✉</i><div><strong>WhatsApp</strong><p>Asesoría en tallas, colores y pedidos.</p></div></div>
+            <a class="btn-pill btn-pill-primary" id="waDirect" style="width:100%;margin-top:14px" href="#" target="_blank" rel="noreferrer">Abrir WhatsApp →</a>
+          </div>
+          <div class="k-form-card rv">
+            <h2 style="font-family:var(--font-display);font-size:30px">Envíanos un mensaje</h2>
+            <p style="color:var(--color-lead);font-size:14px;margin:6px 0 20px">Te responderemos a la brevedad.</p>
+            <form id="contactForm">
+              <div class="k-field"><label>Nombre completo</label><input type="text" placeholder="Ej: Marcela Vargas" required></div>
+              <div class="k-field"><label>Teléfono o WhatsApp</label><input type="tel" placeholder="Ej: 71234567" required></div>
+              <div class="k-field"><label>Mensaje</label><textarea rows="4" placeholder="¿En qué prenda podemos ayudarte?" required></textarea></div>
+              <button type="submit" class="btn-pill btn-pill-primary" style="width:100%">Enviar mensaje</button>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/site.js"></script>
+    <script type="module">
+      import { loadCatalog } from '/src/shared/shop.js';
+      loadCatalog().then(({ store }) => {
+        const a = document.getElementById('waDirect');
+        if (a) a.href = `https://wa.me/${store.whatsappNumber}?text=` + encodeURIComponent('Hola Karmylis, deseo realizar una consulta.');
+      }).catch(() => {});
+    </script>
+  </body>
+</html>

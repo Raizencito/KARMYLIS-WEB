@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo — Karmylis Boutique</title>
+    <meta name="description" content="Catálogo completo de Karmylis: chompas, blusas, vestidos, chaquetas y más. Fotografías reales." />
+  </head>
+  <body>
+    <div class="k-wrap">
+      <main class="k-cat">
+        <div class="k-cat-head">
+          <span class="k-eyebrow" style="justify-content:center">Colección completa</span>
+          <h1>Catálogo de <em>moda &amp; confección</em></h1>
+          <p>Fotografías reales y disponibilidad en boutique. Se cargan por bloques.</p>
+        </div>
+        <div class="k-toolbar">
+          <div class="k-searchpill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input id="q" placeholder="Buscar modelo, marca o código..." autocomplete="off">
+          </div>
+          <div class="k-sortrow">
+            <label class="k-check"><input type="checkbox" id="stock"> Solo en stock</label>
+            <select class="k-select" id="sort">
+              <option value="featured">Destacados</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name">Nombre A–Z</option>
+            </select>
+          </div>
+        </div>
+        <div class="k-pills" id="chips"></div>
+        <div class="k-statusbar" id="statusbar"><span>Cargando catálogo…</span></div>
+        <div class="k-grid" id="grid"></div>
+        <div id="moreWrap" style="text-align:center;margin-top:36px" hidden>
+          <p id="moreCount" style="color:var(--color-lead);font-size:13px;margin-bottom:14px"></p>
+          <button class="btn-pill btn-pill-primary" id="moreBtn">Cargar más prendas</button>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/catalog.js"></script>
+  </body>
+</html>

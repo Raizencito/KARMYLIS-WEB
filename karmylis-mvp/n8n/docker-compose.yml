@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: karmylis-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      # Basic auth for n8n UI
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=karmylis2026
+      # Webhook URL (for local testing with ngrok/tunnel)
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      # Timezone
+      - GENERIC_TIMEZONE=America/La_Paz
+      # Google Sheets credentials (mounted via volume)
+      - GOOGLE_SERVICE_ACCOUNT_JSON=/home/node/.n8n/service-account.json
+      # WhatsApp Cloud API (for production)
+      - WHATSAPP_ACCESS_TOKEN=
+      - WHATSAPP_PHONE_NUMBER_ID=
+      - WHATSAPP_VERIFY_TOKEN=
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./service-account.json:/home/node/.n8n/service-account.json:ro
+      - ./workflows:/home/node/.n8n/workflows:ro
+    restart: unless-stopped
+
+  # Optional: Local Gemini proxy service (Node.js)
+  gemini-proxy:
+    build:
+      context: ..
+      dockerfile: Dockerfile.gemini
+    container_name: karmylis-gemini
+    ports:
+      - "3000:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=3000
+    volumes:
+      - ../functions:/app/functions:ro
+      - ../service-account.json:/app/service-account.json:ro
+    restart: unless-stopped
+
+volumes:
+  n8n_data:

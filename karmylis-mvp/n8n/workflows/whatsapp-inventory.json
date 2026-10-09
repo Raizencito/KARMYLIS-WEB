@@ -1,0 +1,119 @@
+{
+  "name": "Karmylis WhatsApp Inventory",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "WhatsApp Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "karmylis-whatsapp"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse incoming WhatsApp message\n// Meta Cloud API sends: { entry: [{ changes: [{ value: { messages: [{ from, text: { body } }] } }] }]\nconst entry = items[0].json.entry?.[0];\nconst change = entry?.changes?.[0];\nconst value = change?.value;\nconst message = value?.messages?.[0];\n\nif (!message || message.type !== 'text') {\n  return [{ json: { error: 'Not a text message' } }];\n\nconst from = message.from;\nconst text = message.text.body;\n\nreturn [{ json: { from, text, timestamp: Date.now() } }];"
+      },
+      "id": "parse",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Call Gemini classification + tools\n// This would be an HTTP Request to your Gemini function\n// For now, simulate with a placeholder\nconst { from, text } = items[0].json;\n\n// TODO: Replace with actual HTTP call to Gemini service\n// const response = await $http.post('http://host.docker.internal:3000/gemini', { text });\n// return [{ json: { ...items[0].json, gemini: response.data } }];\n\n// MOCK RESPONSE for testing\nconst mockResponses = {\n  'hola': { intent: 'SALUDO', response: '¡Hola! Bienvenida a Karmylis. ¿En qué podemos ayudarte?' },\n  'chompa': { intent: 'CONSULTAR_PRODUCTO', response: 'Tenemos varias chompas disponibles...' },\n  'stock': { intent: 'CONSULTAR_STOCK', response: 'Hay stock disponible.' },\n  'fibonacci': { intent: 'FUERA_DE_ALCANCE', response: 'Puedo ayudarte con productos, tallas, precios...' }\n};\n\nlet matched = mockResponses.hola;\nfor (const [key, val] of Object.entries(mockResponses)) {\n  if (text.toLowerCase().includes(key)) {\n    matched = val;\n    break;\n  }\n}\n\nreturn [{ json: { from, text, ...matched } }];"
+      },
+      "id": "gemini",
+      "name": "Gemini Classify",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Call Google Sheets to get real inventory data\n// This would be an HTTP Request to your inventory service\n// For now, pass through\nreturn items;"
+      },
+      "id": "sheets",
+      "name": "Query Google Sheets",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Format response for WhatsApp\nconst { from, response, intent } = items[0].json;\n\nreturn [{ json: {\n  messaging_product: 'whatsapp',\n  to: from,\n  type: 'text',\n  text: { body: response }\n} }];"
+      },
+      "id": "format",
+      "name": "Format WhatsApp Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v18.0/{{$env.WHATSAPP_PHONE_NUMBER_ID}}/messages",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.WHATSAPP_ACCESS_TOKEN}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "send",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1500, 300],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {},
+        "responseCode": 200,
+        "responseData": "{{$json}}"
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1500, 150]
+    }
+  ],
+  "connections": {
+    "WhatsApp Webhook": {
+      "main": [["Parse Message"]]
+    },
+    "Parse Message": {
+      "main": [["Gemini Classify"]]
+    },
+    "Gemini Classify": {
+      "main": [["Query Google Sheets"]]
+    },
+    "Query Google Sheets": {
+      "main": [["Format WhatsApp Response"]]
+    },
+    "Format WhatsApp Response": {
+      "main": [["Send WhatsApp", "Respond to Webhook"]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "1"
+}
